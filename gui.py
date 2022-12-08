@@ -3,6 +3,7 @@
 A simple PyQT5 GUI for rembg, a tool to remove images background.
 """
 
+import sys
 from pathlib import Path
 
 from PIL import Image
@@ -12,6 +13,7 @@ from PyQt5.QtGui import QImage, QPainter, QPalette, QPixmap
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtWidgets import (
     QAction,
+    QApplication,
     QFileDialog,
     QHBoxLayout,
     QLabel,
@@ -403,12 +405,12 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
 
-if __name__ == "__main__":
-    import sys
-
-    from PyQt5.QtWidgets import QApplication
-
+def main():
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
