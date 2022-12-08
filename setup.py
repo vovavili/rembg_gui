@@ -19,6 +19,7 @@ with open("README.rst") as readme_file:
 requirements = [
     "PyQt5",
     "rembg ",
+    "Pillow"
 ]
 
 test_requirements = []
