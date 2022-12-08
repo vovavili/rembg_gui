@@ -170,7 +170,6 @@ class QImageViewSync(QWidget):
 
     def open_left(self):
         options = QFileDialog.Options()
-        # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         self.fileName, _ = QFileDialog.getOpenFileName(
             self,
             "QFileDialog.getOpenFileName()",
@@ -348,7 +347,6 @@ class MainWindow(QMainWindow):
             enabled=False,
             triggered=view.print_right,
         )
-        # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction(
             "Zoom &In (25%)",
             self,
@@ -385,12 +383,10 @@ class MainWindow(QMainWindow):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openLeftAct)
         self.fileMenu.addAction(self.saveRightAct)
-        # self.fileMenu.addAction(self.openRightAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.printLeftAct)
         self.fileMenu.addAction(self.printRightAct)
         self.fileMenu.addSeparator()
-        # self.fileMenu.addAction(self.exitAct)
 
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.zoomInAct)
