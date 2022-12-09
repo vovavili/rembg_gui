@@ -311,20 +311,30 @@ class MainWindow(QMainWindow):
         self.imageViewSync = QImageViewSync(window=self)
         self.setCentralWidget(self.imageViewSync.centralWidget)
 
-        # Initialize actions
+        self.createActions(self.imageViewSync)
+        self.createMenus()
 
+        self.setWindowTitle("Image View Sync in the Main Window")
+        self.resize(1200, 600)
+
+        self.imageViewSync.openLeft()
+
+    def fitToWindow(self):
+        fitToWindow = self.fitToWindowAct.isChecked()
+        self.imageViewSync.scrollAreaLeft.setWidgetResizable(fitToWindow)
+        self.imageViewSync.scrollAreaRight.setWidgetResizable(fitToWindow)
+        if not fitToWindow:
+            self.imageViewSync.normalSize()
+
+        self.imageViewSync.updateActions()
+
+    def createActions(self, view):
         self.openLeftAct = QAction(
-            "&Open Image",
-            self,
-            shortcut="Ctrl+O",
-            triggered=self.imageViewSync.openLeft,
+            "&Open Image", self, shortcut="Ctrl+O", triggered=view.openLeft
         )
 
         self.saveRightAct = QAction(
-            "&Save Image",
-            self,
-            shortcut="Ctrl+S",
-            triggered=self.imageViewSync.saveRight,
+            "&Save Image", self, shortcut="Ctrl+S", triggered=view.saveRight
         )
 
         self.printLeftAct = QAction(
@@ -332,14 +342,14 @@ class MainWindow(QMainWindow):
             self,
             shortcut="Ctrl+P",
             enabled=False,
-            triggered=self.imageViewSync.printLeft,
+            triggered=view.printLeft,
         )
         self.printRightAct = QAction(
             "&Print Right",
             self,
             shortcut="Shift+Ctrl+P",
             enabled=False,
-            triggered=self.imageViewSync.printRight,
+            triggered=view.printRight,
         )
         # self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=image.close)
         self.zoomInAct = QAction(
@@ -347,21 +357,21 @@ class MainWindow(QMainWindow):
             self,
             shortcut="Ctrl++",
             enabled=False,
-            triggered=self.imageViewSync.zoomIn,
+            triggered=view.zoomIn,
         )
         self.zoomOutAct = QAction(
             "Zoom &Out (25%)",
             self,
             shortcut="Ctrl+-",
             enabled=False,
-            triggered=self.imageViewSync.zoomOut,
+            triggered=view.zoomOut,
         )
         self.normalSizeAct = QAction(
             "&Normal Size",
             self,
             shortcut="Ctrl+S",
             enabled=False,
-            triggered=self.imageViewSync.normalSize,
+            triggered=view.normalSize,
         )
         self.fitToWindowAct = QAction(
             "&Fit to Window",
@@ -371,11 +381,10 @@ class MainWindow(QMainWindow):
             shortcut="Ctrl+F",
             triggered=self.fitToWindow,
         )
-        self.aboutAct = QAction("&About", self, triggered=self.imageViewSync.about)
+        self.aboutAct = QAction("&About", self, triggered=view.about)
         self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
-        # Initialize menus
-
+    def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openLeftAct)
         self.fileMenu.addAction(self.saveRightAct)
@@ -400,20 +409,6 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
-
-        self.setWindowTitle("Rembg")
-        self.resize(1200, 600)
-
-        self.imageViewSync.openLeft()
-
-    def fitToWindow(self):
-        fitToWindow = self.fitToWindowAct.isChecked()
-        self.imageViewSync.scrollAreaLeft.setWidgetResizable(fitToWindow)
-        self.imageViewSync.scrollAreaRight.setWidgetResizable(fitToWindow)
-        if not fitToWindow:
-            self.imageViewSync.normalSize()
-
-        self.imageViewSync.updateActions()
 
 
 def main():
