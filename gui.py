@@ -29,7 +29,7 @@ from rembg import remove
 
 
 class QImageViewSync(QWidget):
-    def __init__(self, window=None):
+    def __init__(self, window=None) -> None:
         super().__init__()
 
         self.right_image = None
@@ -91,7 +91,7 @@ class QImageViewSync(QWidget):
         self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
         self.imageLabelRight.setCursor(Qt.OpenHandCursor)
 
-    def mouse_press_event_left(self, event):
+    def mouse_press_event_left(self, event) -> None:
         self.pressed = True
         self.imageLabelLeft.setCursor(Qt.ClosedHandCursor)
         self.initialPosX = (
@@ -101,13 +101,13 @@ class QImageViewSync(QWidget):
             self.scrollAreaLeft.verticalScrollBar().value() + event.pos().y()
         )
 
-    def mouse_release_event_left(self):
+    def mouse_release_event_left(self) -> None:
         self.pressed = False
         self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
         self.initialPosX = self.scrollAreaLeft.horizontalScrollBar().value()
         self.initialPosY = self.scrollAreaLeft.verticalScrollBar().value()
 
-    def mouse_move_event_left(self, event):
+    def mouse_move_event_left(self, event) -> None:
         if self.pressed:
             self.scrollAreaLeft.horizontalScrollBar().setValue(
                 self.initialPosX - event.pos().x()
@@ -116,7 +116,7 @@ class QImageViewSync(QWidget):
                 self.initialPosY - event.pos().y()
             )
 
-    def mouse_press_event_right(self, event):
+    def mouse_press_event_right(self, event) -> None:
         self.pressed = True
         self.imageLabelRight.setCursor(Qt.ClosedHandCursor)
         self.initialPosX = (
@@ -126,13 +126,13 @@ class QImageViewSync(QWidget):
             self.scrollAreaRight.verticalScrollBar().value() + event.pos().y()
         )
 
-    def mouse_release_event_right(self):
+    def mouse_release_event_right(self) -> None:
         self.pressed = False
         self.imageLabelRight.setCursor(Qt.OpenHandCursor)
         self.initialPosX = self.scrollAreaRight.horizontalScrollBar().value()
         self.initialPosY = self.scrollAreaRight.verticalScrollBar().value()
 
-    def mouse_move_event_right(self, event):
+    def mouse_move_event_right(self, event) -> None:
         if self.pressed:
             self.scrollAreaRight.horizontalScrollBar().setValue(
                 self.initialPosX - event.pos().x()
@@ -141,7 +141,7 @@ class QImageViewSync(QWidget):
                 self.initialPosY - event.pos().y()
             )
 
-    def open(self):
+    def open(self) -> None:
         options = QFileDialog.Options()
         # file_name = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         file_name, _ = QFileDialog.getOpenFileName(
@@ -174,7 +174,7 @@ class QImageViewSync(QWidget):
                 self.imageLabelLeft.adjustSize()
                 self.imageLabelRight.adjustSize()
 
-    def open_left(self):
+    def open_left(self) -> None:
         options = QFileDialog.Options()
         self.fileName, _ = QFileDialog.getOpenFileName(
             self,
@@ -217,7 +217,7 @@ class QImageViewSync(QWidget):
             if not self.window.fitToWindowAct.isChecked():
                 self.imageLabelRight.adjustSize()
 
-    def print_left(self):
+    def print_left(self) -> None:
         dialog = QPrintDialog(self.printer, self)
         if dialog.exec_():
             painter = QPainter(self.printer)
@@ -228,7 +228,7 @@ class QImageViewSync(QWidget):
             painter.setWindow(self.imageLabelLeft.pixmap().rect())
             painter.drawPixmap(0, 0, self.imageLabelLeft.pixmap())
 
-    def print_right(self):
+    def print_right(self) -> None:
         dialog = QPrintDialog(self.printer, self)
         if dialog.exec_():
             painter = QPainter(self.printer)
@@ -239,24 +239,24 @@ class QImageViewSync(QWidget):
             painter.setWindow(self.imageLabelRight.pixmap().rect())
             painter.drawPixmap(0, 0, self.imageLabelRight.pixmap())
 
-    def save_right(self):
+    def save_right(self) -> None:
         path = Path(self.fileName)
         filename = str(path.stem) + "_no_bg.png"
         self.right_image.save(str(path.parent / filename), "png")
         QMessageBox.information(self, "Image Viewer", "Image saved - %s." % filename)
 
-    def zoom_in(self):
+    def zoom_in(self) -> None:
         self.scale_image(1.25)
 
-    def zoom_out(self):
+    def zoom_out(self) -> None:
         self.scale_image(0.8)
 
-    def normal_size(self):
+    def normal_size(self) -> None:
         self.imageLabelLeft.adjustSize()
         self.imageLabelRight.adjustSize()
         self.scaleFactor = 1.0
 
-    def about(self):
+    def about(self) -> None:
         QMessageBox.about(
             self,
             "Image View in the Main Window",
@@ -275,12 +275,12 @@ class QImageViewSync(QWidget):
             "print an image.</p>",
         )
 
-    def update_actions(self):
+    def update_actions(self) -> None:
         self.window.zoomInAct.setEnabled(not self.window.fitToWindowAct.isChecked())
         self.window.zoomOutAct.setEnabled(not self.window.fitToWindowAct.isChecked())
         self.window.normalSizeAct.setEnabled(not self.window.fitToWindowAct.isChecked())
 
-    def scale_image(self, factor):
+    def scale_image(self, factor) -> None:
         self.scaleFactor *= factor
         self.imageLabelLeft.resize(
             self.scaleFactor * self.imageLabelLeft.pixmap().size()
@@ -298,7 +298,7 @@ class QImageViewSync(QWidget):
         self.window.zoomOutAct.setEnabled(self.scaleFactor > 0.333)
 
     @staticmethod
-    def adjust_scroll_bar(scroll_bar, factor):
+    def adjust_scroll_bar(scroll_bar, factor) -> None:
         scroll_bar.setValue(
             int(
                 factor * scroll_bar.value() + ((factor - 1) * scroll_bar.pageStep() / 2)
@@ -307,7 +307,7 @@ class QImageViewSync(QWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.helpMenu = None
@@ -335,7 +335,7 @@ class MainWindow(QMainWindow):
 
         self.imageViewSync.open_left()
 
-    def fit_to_window(self):
+    def fit_to_window(self) -> None:
         fit_to_window = self.fitToWindowAct.isChecked()
         self.imageViewSync.scrollAreaLeft.setWidgetResizable(fit_to_window)
         self.imageViewSync.scrollAreaRight.setWidgetResizable(fit_to_window)
@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
 
         self.imageViewSync.update_actions()
 
-    def create_actions(self, view):
+    def create_actions(self, view) -> None:
         self.openLeftAct = QAction(
             "&Open Image", self, shortcut="Ctrl+O", triggered=view.open_left
         )
@@ -399,7 +399,7 @@ class MainWindow(QMainWindow):
         self.aboutAct = QAction("&About", self, triggered=view.about)
         self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
-    def create_menus(self):
+    def create_menus(self) -> None:
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openLeftAct)
         self.fileMenu.addAction(self.saveRightAct)
@@ -424,7 +424,7 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
 
-def main():
+def main() -> None:
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
