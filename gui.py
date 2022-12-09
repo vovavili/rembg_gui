@@ -411,7 +411,7 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
 
-def main() -> None:
+def main():
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
