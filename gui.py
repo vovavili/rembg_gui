@@ -32,12 +32,6 @@ class QImageViewSync(QWidget):
     def __init__(self, window=None) -> None:
         super().__init__()
 
-        self.right_image = None
-        self.fileName = None
-        self.initialPosY = None
-        self.initialPosX = None
-        self.pressed = None
-
         self.window = window
         self.printer = QPrinter()
         self.scaleFactor = 0.0
@@ -309,20 +303,6 @@ class QImageViewSync(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-
-        self.helpMenu = None
-        self.viewMenu = None
-        self.fileMenu = None
-        self.aboutQtAct = None
-        self.aboutAct = None
-        self.fitToWindowAct = None
-        self.normalSizeAct = None
-        self.zoomOutAct = None
-        self.zoomInAct = None
-        self.printRightAct = None
-        self.printLeftAct = None
-        self.saveRightAct = None
-        self.openLeftAct = None
 
         self.imageViewSync = QImageViewSync(window=self)
         self.setCentralWidget(self.imageViewSync.centralWidget)
