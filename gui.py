@@ -308,7 +308,7 @@ class MainWindow(QMainWindow):
         self.createActions(self.imageViewSync)
         self.createMenus()
 
-        self.setWindowTitle("Image View Sync in the Main Window")
+        self.setWindowTitle("Rembg")
         self.resize(1200, 600)
 
         self.imageViewSync.openLeft()
