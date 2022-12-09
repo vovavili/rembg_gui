@@ -32,12 +32,6 @@ class QImageViewSync(QWidget):
     def __init__(self, window=None) -> None:
         super().__init__()
 
-        self.pressed = False
-        self.initialPosX = 0
-        self.initialPosY = 0
-        self.fileName = ""
-        self.right_image = None
-
         self.window = window
         self.printer = QPrinter()
         self.scaleFactor = 0.0
