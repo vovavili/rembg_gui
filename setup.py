@@ -17,7 +17,7 @@ with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "PyQt5",
+    "PyQt6",
     "rembg ",
     "Pillow"
 ]

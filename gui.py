@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-A simple PyQT5 GUI for rembg, a tool to remove images background.
+A simple PyQT6 GUI for rembg, a tool to remove images background.
 """
 
 import sys
@@ -8,11 +8,10 @@ from pathlib import Path
 
 from PIL import Image
 from PIL.ImageQt import ImageQt
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QImage, QPainter, QPalette, QPixmap
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtWidgets import (
-    QAction,
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QImage, QPainter, QPalette, QPixmap
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
     QHBoxLayout,
@@ -23,7 +22,6 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QWidget,
-    qApp,
 )
 from rembg import remove
 
