@@ -213,7 +213,7 @@ class QImageViewSync(QWidget):
 
     def printLeft(self):
         dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
+        if dialog.exec():
             painter = QPainter(self.printer)
             rect = painter.viewport()
             size = self.imageLabelLeft.pixmap().size()
@@ -224,7 +224,7 @@ class QImageViewSync(QWidget):
 
     def printRight(self):
         dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
+        if dialog.exec():
             painter = QPainter(self.printer)
             rect = painter.viewport()
             size = self.imageLabelRight.pixmap().size()
@@ -408,7 +408,7 @@ def main():
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
