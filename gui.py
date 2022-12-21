@@ -36,7 +36,7 @@ class QImageViewSync(QWidget):
 
         self.imageLabelLeft = QLabel()
         self.imageLabelLeft.setBackgroundRole(QPalette.ColorRole.Base)
-        self.imageLabelLeft.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabelLeft.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         self.imageLabelLeft.setScaledContents(True)
 
         self.scrollAreaLeft = QScrollArea()
@@ -46,7 +46,7 @@ class QImageViewSync(QWidget):
 
         self.imageLabelRight = QLabel()
         self.imageLabelRight.setBackgroundRole(QPalette.ColorRole.Base)
-        self.imageLabelRight.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabelRight.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         self.imageLabelRight.setScaledContents(True)
 
         self.scrollAreaRight = QScrollArea()
