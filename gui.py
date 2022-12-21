@@ -375,7 +375,7 @@ class MainWindow(QMainWindow):
             triggered=self.fitToWindow,
         )
         self.aboutAct = QAction("&About", self, triggered=view.about)
-        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
+        self.aboutQtAct = QAction("About &Qt", self, triggered=QApplication.aboutQt)
 
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
