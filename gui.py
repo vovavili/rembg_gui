@@ -81,12 +81,12 @@ class QImageViewSync(QWidget):
         self.scrollAreaRight.mousePressEvent = self.mousePressEventRight
         self.scrollAreaRight.mouseReleaseEvent = self.mouseReleaseEventRight
 
-        self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
-        self.imageLabelRight.setCursor(Qt.OpenHandCursor)
+        self.imageLabelLeft.setCursor(Qt.CursorShape.OpenHandCursor)
+        self.imageLabelRight.setCursor(Qt.CursorShape.OpenHandCursor)
 
     def mousePressEventLeft(self, event):
         self.pressed = True
-        self.imageLabelLeft.setCursor(Qt.ClosedHandCursor)
+        self.imageLabelLeft.setCursor(Qt.CursorShape.ClosedHandCursor)
         self.initialPosX = (
             self.scrollAreaLeft.horizontalScrollBar().value() + event.pos().x()
         )
@@ -96,7 +96,7 @@ class QImageViewSync(QWidget):
 
     def mouseReleaseEventLeft(self, event):
         self.pressed = False
-        self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
+        self.imageLabelLeft.setCursor(Qt.CursorShape.OpenHandCursor)
         self.initialPosX = self.scrollAreaLeft.horizontalScrollBar().value()
         self.initialPosY = self.scrollAreaLeft.verticalScrollBar().value()
 
@@ -111,7 +111,7 @@ class QImageViewSync(QWidget):
 
     def mousePressEventRight(self, event):
         self.pressed = True
-        self.imageLabelRight.setCursor(Qt.ClosedHandCursor)
+        self.imageLabelRight.setCursor(Qt.CursorShape.ClosedHandCursor)
         self.initialPosX = (
             self.scrollAreaRight.horizontalScrollBar().value() + event.pos().x()
         )
@@ -121,7 +121,7 @@ class QImageViewSync(QWidget):
 
     def mouseReleaseEventRight(self, event):
         self.pressed = False
-        self.imageLabelRight.setCursor(Qt.OpenHandCursor)
+        self.imageLabelRight.setCursor(Qt.CursorShape.OpenHandCursor)
         self.initialPosX = self.scrollAreaRight.horizontalScrollBar().value()
         self.initialPosY = self.scrollAreaRight.verticalScrollBar().value()
 
