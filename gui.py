@@ -32,6 +32,7 @@ class QImageViewSync(QWidget):
 
         self.window = window
         self.printer = QPrinter()
+        self.fileDialog = QFileDialog()
         self.scaleFactor = 0.0
 
         self.imageLabelLeft = QLabel()
@@ -134,7 +135,7 @@ class QImageViewSync(QWidget):
             )
 
     def open(self):
-        options = QFileDialog.Options()
+        options = self.fileDialog.options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         fileName, _ = QFileDialog.getOpenFileName(
             self,
@@ -167,7 +168,7 @@ class QImageViewSync(QWidget):
                 self.imageLabelRight.adjustSize()
 
     def openLeft(self):
-        options = QFileDialog.Options()
+        options = self.fileDialog.options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         self.fileName, _ = QFileDialog.getOpenFileName(
             self,
