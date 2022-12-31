@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-A simple PyQT5 GUI for rembg, a tool to remove images background.
+A simple PyQT6 GUI for rembg, a tool to remove images background.
 """
 
 import sys
@@ -8,11 +8,10 @@ from pathlib import Path
 
 from PIL import Image
 from PIL.ImageQt import ImageQt
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QImage, QPainter, QPalette, QPixmap
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtWidgets import (
-    QAction,
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QImage, QPainter, QPalette, QPixmap
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
     QHBoxLayout,
@@ -23,7 +22,6 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QWidget,
-    qApp,
 )
 from rembg import remove
 
@@ -34,25 +32,26 @@ class QImageViewSync(QWidget):
 
         self.window = window
         self.printer = QPrinter()
+        self.fileDialog = QFileDialog()
         self.scaleFactor = 0.0
 
         self.imageLabelLeft = QLabel()
-        self.imageLabelLeft.setBackgroundRole(QPalette.Base)
-        self.imageLabelLeft.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabelLeft.setBackgroundRole(QPalette.ColorRole.Base)
+        self.imageLabelLeft.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         self.imageLabelLeft.setScaledContents(True)
 
         self.scrollAreaLeft = QScrollArea()
-        self.scrollAreaLeft.setBackgroundRole(QPalette.Dark)
+        self.scrollAreaLeft.setBackgroundRole(QPalette.ColorRole.Dark)
         self.scrollAreaLeft.setWidget(self.imageLabelLeft)
         self.scrollAreaLeft.setVisible(False)
 
         self.imageLabelRight = QLabel()
-        self.imageLabelRight.setBackgroundRole(QPalette.Base)
-        self.imageLabelRight.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabelRight.setBackgroundRole(QPalette.ColorRole.Base)
+        self.imageLabelRight.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
         self.imageLabelRight.setScaledContents(True)
 
         self.scrollAreaRight = QScrollArea()
-        self.scrollAreaRight.setBackgroundRole(QPalette.Dark)
+        self.scrollAreaRight.setBackgroundRole(QPalette.ColorRole.Dark)
         self.scrollAreaRight.setWidget(self.imageLabelRight)
         self.scrollAreaRight.setVisible(False)
 
@@ -82,12 +81,12 @@ class QImageViewSync(QWidget):
         self.scrollAreaRight.mousePressEvent = self.mousePressEventRight
         self.scrollAreaRight.mouseReleaseEvent = self.mouseReleaseEventRight
 
-        self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
-        self.imageLabelRight.setCursor(Qt.OpenHandCursor)
+        self.imageLabelLeft.setCursor(Qt.CursorShape.OpenHandCursor)
+        self.imageLabelRight.setCursor(Qt.CursorShape.OpenHandCursor)
 
     def mousePressEventLeft(self, event):
         self.pressed = True
-        self.imageLabelLeft.setCursor(Qt.ClosedHandCursor)
+        self.imageLabelLeft.setCursor(Qt.CursorShape.ClosedHandCursor)
         self.initialPosX = (
             self.scrollAreaLeft.horizontalScrollBar().value() + event.pos().x()
         )
@@ -97,7 +96,7 @@ class QImageViewSync(QWidget):
 
     def mouseReleaseEventLeft(self, event):
         self.pressed = False
-        self.imageLabelLeft.setCursor(Qt.OpenHandCursor)
+        self.imageLabelLeft.setCursor(Qt.CursorShape.OpenHandCursor)
         self.initialPosX = self.scrollAreaLeft.horizontalScrollBar().value()
         self.initialPosY = self.scrollAreaLeft.verticalScrollBar().value()
 
@@ -112,7 +111,7 @@ class QImageViewSync(QWidget):
 
     def mousePressEventRight(self, event):
         self.pressed = True
-        self.imageLabelRight.setCursor(Qt.ClosedHandCursor)
+        self.imageLabelRight.setCursor(Qt.CursorShape.ClosedHandCursor)
         self.initialPosX = (
             self.scrollAreaRight.horizontalScrollBar().value() + event.pos().x()
         )
@@ -122,7 +121,7 @@ class QImageViewSync(QWidget):
 
     def mouseReleaseEventRight(self, event):
         self.pressed = False
-        self.imageLabelRight.setCursor(Qt.OpenHandCursor)
+        self.imageLabelRight.setCursor(Qt.CursorShape.OpenHandCursor)
         self.initialPosX = self.scrollAreaRight.horizontalScrollBar().value()
         self.initialPosY = self.scrollAreaRight.verticalScrollBar().value()
 
@@ -136,7 +135,7 @@ class QImageViewSync(QWidget):
             )
 
     def open(self):
-        options = QFileDialog.Options()
+        options = self.fileDialog.options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         fileName, _ = QFileDialog.getOpenFileName(
             self,
@@ -169,7 +168,7 @@ class QImageViewSync(QWidget):
                 self.imageLabelRight.adjustSize()
 
     def openLeft(self):
-        options = QFileDialog.Options()
+        options = self.fileDialog.options()
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         self.fileName, _ = QFileDialog.getOpenFileName(
             self,
@@ -214,22 +213,22 @@ class QImageViewSync(QWidget):
 
     def printLeft(self):
         dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
+        if dialog.exec():
             painter = QPainter(self.printer)
             rect = painter.viewport()
             size = self.imageLabelLeft.pixmap().size()
-            size.scale(rect.size(), Qt.KeepAspectRatio)
+            size.scale(rect.size(), Qt.AspectRatioMode.KeepAspectRatio)
             painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
             painter.setWindow(self.imageLabelLeft.pixmap().rect())
             painter.drawPixmap(0, 0, self.imageLabelLeft.pixmap())
 
     def printRight(self):
         dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
+        if dialog.exec():
             painter = QPainter(self.printer)
             rect = painter.viewport()
             size = self.imageLabelRight.pixmap().size()
-            size.scale(rect.size(), Qt.KeepAspectRatio)
+            size.scale(rect.size(), Qt.AspectRatioMode.KeepAspectRatio)
             painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
             painter.setWindow(self.imageLabelRight.pixmap().rect())
             painter.drawPixmap(0, 0, self.imageLabelRight.pixmap())
@@ -376,7 +375,7 @@ class MainWindow(QMainWindow):
             triggered=self.fitToWindow,
         )
         self.aboutAct = QAction("&About", self, triggered=view.about)
-        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
+        self.aboutQtAct = QAction("About &Qt", self, triggered=QApplication.aboutQt)
 
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
@@ -409,7 +408,7 @@ def main():
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

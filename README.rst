@@ -6,7 +6,7 @@ GUI for rembg
     :align: center
 
 
-A simple PyQT5 GUI for rembg_, a tool to remove images background.
+A simple PyQT6 GUI for rembg_, a tool to remove images background.
 
 Credits
 -------

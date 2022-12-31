@@ -17,7 +17,7 @@ with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "PyQt5",
+    "PyQt6",
     "rembg ",
     "Pillow"
 ]
@@ -36,7 +36,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
-    description="A simple PyQT5 GUI for rembg, a tool to remove images background.",
+    description="A simple PyQT6 GUI for rembg, a tool to remove images background.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme,
