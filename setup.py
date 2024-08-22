@@ -18,7 +18,7 @@ with open("README.rst") as readme_file:
 
 requirements = [
     "PyQt6",
-    "rembg ",
+    "rembg",
     "Pillow"
 ]
 
