@@ -41,3 +41,8 @@ builds, runs `ctest` with `REMBG_NATIVE_RUN_MODEL_TESTS=1`, installs into
 Releases keep `gui.py` at the repository root and publish a Windows x64 zip
 bundle plus a Linux x64 AppImage. The ONNX model is not bundled with the
 binaries.
+
+The Windows zip opens with `rembg-gui.exe` in the top folder. That file is a
+small launcher; the real Qt app and its DLLs stay in `bin/` as
+`rembg-gui-app.exe`. Users should extract the zip and run the launcher from the
+extracted folder.

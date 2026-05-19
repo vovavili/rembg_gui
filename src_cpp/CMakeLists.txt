@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+
 project(rembg_gui_cpp LANGUAGES CXX)
 
 include(CTest)
@@ -194,7 +198,11 @@ endfunction()
 add_executable(rembg-gui-native src/main.cpp)
 target_link_libraries(rembg-gui-native PRIVATE rembg_native_lib)
 rembg_import_qt_static_plugins(rembg-gui-native)
-set_target_properties(rembg-gui-native PROPERTIES OUTPUT_NAME rembg-gui)
+if(WIN32)
+  set_target_properties(rembg-gui-native PROPERTIES OUTPUT_NAME rembg-gui-app)
+else()
+  set_target_properties(rembg-gui-native PROPERTIES OUTPUT_NAME rembg-gui)
+endif()
 
 add_custom_command(TARGET rembg-gui-native POST_BUILD
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different
@@ -204,6 +212,14 @@ add_custom_command(TARGET rembg-gui-native POST_BUILD
 
 if(WIN32)
   set_target_properties(rembg-gui-native PROPERTIES WIN32_EXECUTABLE TRUE)
+  add_executable(rembg-gui-launcher WIN32 src/WindowsLauncher.cpp)
+  target_compile_features(rembg-gui-launcher PRIVATE cxx_std_23)
+  target_link_libraries(rembg-gui-launcher PRIVATE Shell32 User32)
+  set_target_properties(rembg-gui-launcher
+    PROPERTIES
+      OUTPUT_NAME rembg-gui
+      MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+  )
 elseif(APPLE)
   set_target_properties(rembg-gui-native PROPERTIES MACOSX_BUNDLE TRUE)
 elseif(UNIX)
@@ -218,6 +234,8 @@ install(TARGETS rembg-gui-native
 )
 
 if(WIN32)
+  install(TARGETS rembg-gui-launcher RUNTIME DESTINATION .)
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/packaging/README-Windows.txt DESTINATION .)
   install(FILES $<TARGET_RUNTIME_DLLS:rembg-gui-native> DESTINATION ${CMAKE_INSTALL_BINDIR})
   if(DEFINED VCPKG_INSTALLED_DIR AND DEFINED VCPKG_TARGET_TRIPLET)
     set(REMBG_VCPKG_BIN_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin")

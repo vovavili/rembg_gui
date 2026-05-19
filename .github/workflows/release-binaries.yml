@@ -131,7 +131,23 @@ jobs:
       - name: Package Windows bundle
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist/rembg-gui/* -DestinationPath ${{ matrix.artifact }}
+        run: |
+          $required = @(
+            "dist/rembg-gui/rembg-gui.exe",
+            "dist/rembg-gui/README-Windows.txt",
+            "dist/rembg-gui/bin/rembg-gui-app.exe",
+            "dist/rembg-gui/bin/Qt6Core.dll",
+            "dist/rembg-gui/bin/onnxruntime.dll",
+            "dist/rembg-gui/bin/qt.conf"
+          )
+
+          foreach ($path in $required) {
+            if (!(Test-Path $path)) {
+              throw "Missing expected bundle file: $path"
+            }
+          }
+
+          Compress-Archive -Path dist/rembg-gui/* -DestinationPath ${{ matrix.artifact }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
