@@ -233,11 +233,21 @@ function(rembg_resolve_qt_plugin_dir output_variable)
 endfunction()
 
 if(BUILD_TESTING)
+  if(WIN32 OR APPLE)
+    set(REMBG_ENABLE_GUI_SMOKE_TESTS_DEFAULT ON)
+  else()
+    set(REMBG_ENABLE_GUI_SMOKE_TESTS_DEFAULT OFF)
+  endif()
+  option(
+    REMBG_ENABLE_GUI_SMOKE_TESTS
+    "Build QWidget smoke tests that require a Qt platform plugin"
+    ${REMBG_ENABLE_GUI_SMOKE_TESTS_DEFAULT}
+  )
+
   file(TO_CMAKE_PATH "${REMBG_REPO_ROOT}/example.png" REMBG_NATIVE_SAMPLE_IMAGE)
   add_executable(rembg-native-tests
     tests/ImageProcessingTests.cpp
     tests/IntegrationTests.cpp
-    tests/MainWindowSmokeTest.cpp
     tests/TestMain.cpp
   )
   target_compile_features(rembg-native-tests PRIVATE cxx_std_23)
@@ -252,13 +262,6 @@ if(BUILD_TESTING)
             $<TARGET_FILE_DIR:rembg-native-tests>
   )
   add_test(NAME rembg-native-tests COMMAND rembg-native-tests)
-  rembg_resolve_qt_plugin_dir(REMBG_QT_PLUGIN_DIR)
-  set(REMBG_QT_PLATFORM_PLUGIN_DIR "${REMBG_QT_PLUGIN_DIR}/platforms")
-  set(REMBG_TEST_ENVIRONMENT
-    "QT_QPA_PLATFORM=minimal"
-    "QT_PLUGIN_PATH=${REMBG_QT_PLUGIN_DIR}"
-    "QT_QPA_PLATFORM_PLUGIN_PATH=${REMBG_QT_PLATFORM_PLUGIN_DIR}"
-  )
   set(REMBG_TEST_ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
     "PATH=path_list_prepend:$<TARGET_FILE_DIR:onnxruntime::onnxruntime>"
@@ -266,7 +269,35 @@ if(BUILD_TESTING)
   set_tests_properties(rembg-native-tests
     PROPERTIES
       TIMEOUT 600
-      ENVIRONMENT "${REMBG_TEST_ENVIRONMENT}"
       ENVIRONMENT_MODIFICATION "${REMBG_TEST_ENVIRONMENT_MODIFICATION}"
   )
+
+  if(REMBG_ENABLE_GUI_SMOKE_TESTS)
+    add_executable(rembg-gui-smoke-tests
+      tests/GuiSmokeTestMain.cpp
+      tests/MainWindowSmokeTest.cpp
+    )
+    target_compile_features(rembg-gui-smoke-tests PRIVATE cxx_std_23)
+    target_link_libraries(rembg-gui-smoke-tests PRIVATE rembg_native_lib Qt6::Test)
+    add_custom_command(TARGET rembg-gui-smoke-tests POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+              ${REMBG_ONNXRUNTIME_RUNTIME_FILES}
+              $<TARGET_FILE_DIR:rembg-gui-smoke-tests>
+    )
+    add_test(NAME rembg-gui-smoke-tests COMMAND rembg-gui-smoke-tests)
+
+    rembg_resolve_qt_plugin_dir(REMBG_QT_PLUGIN_DIR)
+    set(REMBG_QT_PLATFORM_PLUGIN_DIR "${REMBG_QT_PLUGIN_DIR}/platforms")
+    set(REMBG_GUI_TEST_ENVIRONMENT
+      "QT_QPA_PLATFORM=minimal"
+      "QT_PLUGIN_PATH=${REMBG_QT_PLUGIN_DIR}"
+      "QT_QPA_PLATFORM_PLUGIN_PATH=${REMBG_QT_PLATFORM_PLUGIN_DIR}"
+    )
+    set_tests_properties(rembg-gui-smoke-tests
+      PROPERTIES
+        TIMEOUT 60
+        ENVIRONMENT "${REMBG_GUI_TEST_ENVIRONMENT}"
+        ENVIRONMENT_MODIFICATION "${REMBG_TEST_ENVIRONMENT_MODIFICATION}"
+    )
+  endif()
 endif()
