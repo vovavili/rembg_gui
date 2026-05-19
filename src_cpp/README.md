@@ -32,9 +32,9 @@ in VS Code, choose "Reopen in Container", then run:
 bash src_cpp/scripts/ci-linux.sh
 ```
 
-That script uses Ubuntu 22.04 packages, vcpkg manifest mode, a Release build,
-and `REMBG_NATIVE_RUN_MODEL_TESTS=1`, matching the Linux release job closely
-enough to catch the model download path before pushing.
+That script is also what GitHub Actions runs for the Linux job. It configures,
+builds, runs `ctest` with `REMBG_NATIVE_RUN_MODEL_TESTS=1`, installs into
+`AppDir`, and builds the AppImage with linuxdeploy.
 
 ## Release layout
 

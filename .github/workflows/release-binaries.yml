@@ -98,7 +98,14 @@ jobs:
           fi
           ./vcpkg/bootstrap-vcpkg.sh
 
+      - name: Build and package Linux AppImage
+        if: runner.os == 'Linux'
+        env:
+          ARTIFACT_NAME: ${{ matrix.artifact }}
+        run: bash src_cpp/scripts/ci-linux.sh
+
       - name: Configure
+        if: runner.os == 'Windows'
         run: >
           cmake -S src_cpp -B build
           -DCMAKE_BUILD_TYPE=Release
@@ -107,9 +114,11 @@ jobs:
           -DVCPKG_INSTALLED_DIR=${{ github.workspace }}/vcpkg_installed
 
       - name: Build
+        if: runner.os == 'Windows'
         run: cmake --build build --config Release --parallel
 
       - name: Test
+        if: runner.os == 'Windows'
         env:
           REMBG_NATIVE_RUN_MODEL_TESTS: "1"
           U2NET_HOME: ${{ github.workspace }}/build/model-cache
@@ -123,34 +132,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: Compress-Archive -Path dist/rembg-gui/* -DestinationPath ${{ matrix.artifact }}
-
-      - name: Install Linux AppDir
-        if: runner.os == 'Linux'
-        run: cmake --install build --config Release --prefix "$PWD/AppDir/usr"
-
-      - name: Build Linux AppImage
-        if: runner.os == 'Linux'
-        env:
-          APPIMAGE_EXTRACT_AND_RUN: "1"
-          QMAKE: ${{ github.workspace }}/vcpkg_installed/${{ matrix.triplet }}/tools/Qt6/bin/qmake
-        run: |
-          curl -L -o linuxdeploy-x86_64.AppImage \
-            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-          curl -L -o linuxdeploy-plugin-qt-x86_64.AppImage \
-            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
-
-          ./linuxdeploy-x86_64.AppImage \
-            --appdir AppDir \
-            --executable AppDir/usr/bin/rembg-gui \
-            --desktop-file src_cpp/packaging/rembg-gui.desktop \
-            --icon-file src_cpp/packaging/rembg-gui.svg \
-            --plugin qt \
-            --output appimage
-
-          generated_appimage="$(find . -maxdepth 1 -name '*.AppImage' ! -name 'linuxdeploy*.AppImage' -print -quit)"
-          test -n "$generated_appimage"
-          mv "$generated_appimage" "${{ matrix.artifact }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

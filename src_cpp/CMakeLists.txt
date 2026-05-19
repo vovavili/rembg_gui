@@ -170,6 +170,10 @@ if(WIN32)
   set_target_properties(rembg-gui-native PROPERTIES WIN32_EXECUTABLE TRUE)
 elseif(APPLE)
   set_target_properties(rembg-gui-native PROPERTIES MACOSX_BUNDLE TRUE)
+elseif(UNIX)
+  set_target_properties(rembg-gui-native PROPERTIES
+    INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}"
+  )
 endif()
 
 install(TARGETS rembg-gui-native
