@@ -61,7 +61,7 @@ jobs:
           path: |
             ${{ github.workspace }}/vcpkg
             ${{ github.workspace }}/vcpkg_installed
-          key: vcpkg-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-${{ matrix.triplet }}-${{ hashFiles('src_cpp/vcpkg.json') }}
 
       - name: Bootstrap vcpkg on Windows
         if: runner.os == 'Windows'
@@ -82,7 +82,7 @@ jobs:
 
       - name: Configure
         run: >
-          cmake -S . -B build
+          cmake -S src_cpp -B build
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}

@@ -36,10 +36,10 @@ already extracted release.
 
 .. code-block:: powershell
 
-    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
-    cmake --build build --config Release
-    ctest --test-dir build --output-on-failure
-    cmake --install build --config Release --prefix "$PWD\dist\rembg-gui"
+    cmake -S src_cpp -B src_cpp/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
+    cmake --build src_cpp/build --config Release
+    ctest --test-dir src_cpp/build --output-on-failure
+    cmake --install src_cpp/build --config Release --prefix "$PWD\dist\rembg-gui"
 
 The C++ app downloads ``u2net.onnx`` on first use and caches it locally.
 Set ``U2NET_HOME`` to choose a different model directory.

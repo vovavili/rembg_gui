@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.25)
 
+project(rembg_gui_cpp LANGUAGES CXX)
+
+include(CTest)
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets PrintSupport Network Test)
 include(GNUInstallDirs)
+
+get_filename_component(REMBG_REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 
 set(REMBG_ONNXRUNTIME_VERSION "1.23.2" CACHE STRING "ONNX Runtime binary release version")
 set(ONNXRUNTIME_ROOT "" CACHE PATH "Path to an extracted official ONNX Runtime binary release")
@@ -180,7 +186,7 @@ endif()
 
 install(FILES ${REMBG_ONNXRUNTIME_RUNTIME_FILES} DESTINATION ${REMBG_ONNXRUNTIME_INSTALL_DIR})
 
-install(FILES ${CMAKE_SOURCE_DIR}/gui.py DESTINATION .)
+install(FILES ${REMBG_REPO_ROOT}/gui.py DESTINATION .)
 
 if(UNIX AND NOT APPLE)
   install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/packaging/rembg-gui.desktop
@@ -201,7 +207,7 @@ if(COMMAND qt_generate_deploy_app_script)
 endif()
 
 if(BUILD_TESTING)
-  file(TO_CMAKE_PATH "${CMAKE_SOURCE_DIR}/example.png" REMBG_NATIVE_SAMPLE_IMAGE)
+  file(TO_CMAKE_PATH "${REMBG_REPO_ROOT}/example.png" REMBG_NATIVE_SAMPLE_IMAGE)
   add_executable(rembg-native-tests
     tests/ImageProcessingTests.cpp
     tests/IntegrationTests.cpp
@@ -220,7 +226,11 @@ if(BUILD_TESTING)
             $<TARGET_FILE_DIR:rembg-native-tests>
   )
   add_test(NAME rembg-native-tests COMMAND rembg-native-tests)
-  set(REMBG_QT_PLUGIN_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/Qt6/plugins")
+  if(DEFINED VCPKG_INSTALLED_DIR AND DEFINED VCPKG_TARGET_TRIPLET)
+    set(REMBG_QT_PLUGIN_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/Qt6/plugins")
+  else()
+    set(REMBG_QT_PLUGIN_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/Qt6/plugins")
+  endif()
   set_tests_properties(rembg-native-tests
     PROPERTIES
       TIMEOUT 600

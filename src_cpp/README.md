@@ -11,10 +11,10 @@ downloads the official ONNX Runtime binary, or you can pass `ONNXRUNTIME_ROOT`
 to an already extracted release.
 
 ```powershell
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
-cmake --build build --config Release
-ctest --test-dir build --output-on-failure
-cmake --install build --config Release --prefix "$PWD\dist\rembg-gui"
+cmake -S src_cpp -B src_cpp/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:\path\to\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build src_cpp/build --config Release
+ctest --test-dir src_cpp/build --output-on-failure
+cmake --install src_cpp/build --config Release --prefix "$PWD\dist\rembg-gui"
 ```
 
 ## Model cache
