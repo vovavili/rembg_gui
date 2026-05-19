@@ -3,8 +3,12 @@
 
 #include <algorithm>
 #include <exception>
+#include <cstdio>
 
 #include <QImage>
+#include <QNetworkAccessManager>
+#include <QSslSocket>
+#include <QStringList>
 #include <QtTest>
 
 namespace rembg::native_app {
@@ -31,26 +35,52 @@ private slots:
     }
 
 private:
+    static void failWithMessage(const QString& message) {
+        const QByteArray bytes = message.toUtf8();
+        std::fprintf(stderr, "%s\n", bytes.constData());
+        QFAIL(bytes.constData());
+    }
+
+    void requireHttpsSupport() {
+        QNetworkAccessManager manager;
+        const QStringList schemes = manager.supportedSchemes();
+        if (!schemes.contains(QStringLiteral("https"), Qt::CaseInsensitive)) {
+            failWithMessage(
+                QStringLiteral("Qt Network does not support HTTPS. Supported schemes: %1")
+                    .arg(schemes.join(", "))
+            );
+        }
+
+        if (!QSslSocket::supportsSsl()) {
+            failWithMessage(
+                QStringLiteral("Qt SSL is unavailable. Built against: %1. Runtime: %2.")
+                    .arg(
+                        QSslSocket::sslLibraryBuildVersionString(),
+                        QSslSocket::sslLibraryVersionString()
+                    )
+            );
+        }
+    }
+
     void runEnabledModelTest() {
         QImage image(QString::fromUtf8(REMBG_NATIVE_SAMPLE_IMAGE));
         QVERIFY2(!image.isNull(), "The sample image could not be loaded.");
 
+        requireHttpsSupport();
+
         auto modelPath = ModelManager::ensureU2NetModel();
         if (!modelPath.has_value()) {
-            const QByteArray message = modelPath.error().toUtf8();
-            QFAIL(message.constData());
+            failWithMessage(modelPath.error());
         }
 
         auto engine = BackgroundRemovalEngine::create(*modelPath);
         if (!engine.has_value()) {
-            const QByteArray message = engine.error().toUtf8();
-            QFAIL(message.constData());
+            failWithMessage(engine.error());
         }
 
         auto result = (*engine)->removeBackground(image);
         if (!result.has_value()) {
-            const QByteArray message = result.error().toUtf8();
-            QFAIL(message.constData());
+            failWithMessage(result.error());
         }
         QCOMPARE(result->image.size(), image.size());
         QVERIFY(result->image.hasAlphaChannel());

@@ -23,6 +23,19 @@ The app downloads `u2net.onnx` on first use, verifies its MD5 checksum, and
 stores it in the Qt app data directory. Set `U2NET_HOME` to use a custom model
 directory.
 
+## Local Linux CI
+
+The release workflow is reproducible in the devcontainer. Open the repository
+in VS Code, choose "Reopen in Container", then run:
+
+```bash
+bash src_cpp/scripts/ci-linux.sh
+```
+
+That script uses Ubuntu 22.04 packages, vcpkg manifest mode, a Release build,
+and `REMBG_NATIVE_RUN_MODEL_TESTS=1`, matching the Linux release job closely
+enough to catch the model download path before pushing.
+
 ## Release layout
 
 Releases keep `gui.py` at the repository root and publish a Windows x64 zip

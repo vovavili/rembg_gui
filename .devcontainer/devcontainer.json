@@ -1,0 +1,20 @@
+{
+  "name": "rembg_gui Linux CI",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "VCPKG_ROOT": "/opt/vcpkg",
+    "VCPKG_DEFAULT_TRIPLET": "x64-linux"
+  },
+  "postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && cmake --version && /opt/vcpkg/vcpkg version",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools"
+      ]
+    }
+  }
+}

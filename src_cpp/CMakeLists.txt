@@ -133,8 +133,31 @@ else()
   target_compile_options(rembg_native_lib PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+function(rembg_import_qt_tls_plugins target)
+  if(NOT COMMAND qt_import_plugins)
+    return()
+  endif()
+
+  set(tls_plugins)
+  foreach(plugin IN ITEMS
+      Qt6::QTlsBackendOpenSSLPlugin
+      Qt6::QSchannelBackendPlugin
+      Qt6::QSecureTransportBackendPlugin
+      Qt6::QTlsBackendCertOnlyPlugin
+  )
+    if(TARGET ${plugin})
+      list(APPEND tls_plugins ${plugin})
+    endif()
+  endforeach()
+
+  if(tls_plugins)
+    qt_import_plugins(${target} INCLUDE_BY_TYPE tls ${tls_plugins})
+  endif()
+endfunction()
+
 add_executable(rembg-gui-native src/main.cpp)
 target_link_libraries(rembg-gui-native PRIVATE rembg_native_lib)
+rembg_import_qt_tls_plugins(rembg-gui-native)
 set_target_properties(rembg-gui-native PROPERTIES OUTPUT_NAME rembg-gui)
 
 add_custom_command(TARGET rembg-gui-native POST_BUILD
@@ -266,9 +289,15 @@ if(BUILD_TESTING)
     "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
     "PATH=path_list_prepend:$<TARGET_FILE_DIR:onnxruntime::onnxruntime>"
   )
+  rembg_resolve_qt_plugin_dir(REMBG_QT_PLUGIN_DIR)
+  set(REMBG_TEST_ENVIRONMENT
+    "QT_PLUGIN_PATH=${REMBG_QT_PLUGIN_DIR}"
+  )
+  rembg_import_qt_tls_plugins(rembg-native-tests)
   set_tests_properties(rembg-native-tests
     PROPERTIES
       TIMEOUT 600
+      ENVIRONMENT "${REMBG_TEST_ENVIRONMENT}"
       ENVIRONMENT_MODIFICATION "${REMBG_TEST_ENVIRONMENT_MODIFICATION}"
   )
 
@@ -279,6 +308,7 @@ if(BUILD_TESTING)
     )
     target_compile_features(rembg-gui-smoke-tests PRIVATE cxx_std_23)
     target_link_libraries(rembg-gui-smoke-tests PRIVATE rembg_native_lib Qt6::Test)
+    rembg_import_qt_tls_plugins(rembg-gui-smoke-tests)
     add_custom_command(TARGET rembg-gui-smoke-tests POST_BUILD
       COMMAND "${CMAKE_COMMAND}" -E copy_if_different
               ${REMBG_ONNXRUNTIME_RUNTIME_FILES}

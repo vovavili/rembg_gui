@@ -9,6 +9,7 @@
         "gui",
         "jpeg",
         "network",
+        "openssl",
         "png",
         "testlib",
         "thread",
