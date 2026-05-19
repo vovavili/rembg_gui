@@ -72,7 +72,7 @@ Expected<std::unique_ptr<BackgroundRemovalEngine>> BackgroundRemovalEngine::crea
                            .arg(QString::fromUtf8(error.what())));
     }
 
-    return engine;
+    return std::move(engine);
 }
 
 Expected<RemovalResult> BackgroundRemovalEngine::removeBackground(const QImage& image) {
