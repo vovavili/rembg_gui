@@ -38,9 +38,7 @@ linuxdeploy_qt="${repo_root}/linuxdeploy-plugin-qt-x86_64.AppImage"
 
 curl -L -o "${linuxdeploy}" \
   https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-curl -L -o "${linuxdeploy_qt}" \
-  https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-chmod +x "${linuxdeploy}" "${linuxdeploy_qt}"
+chmod +x "${linuxdeploy}"
 
 export APPIMAGE_EXTRACT_AND_RUN="${APPIMAGE_EXTRACT_AND_RUN:-1}"
 export QMAKE="${QMAKE:-${VCPKG_INSTALLED_DIR}/${VCPKG_DEFAULT_TRIPLET}/tools/Qt6/bin/qmake}"
@@ -48,13 +46,24 @@ export LD_LIBRARY_PATH="${repo_root}/AppDir/usr/lib:${VCPKG_INSTALLED_DIR}/${VCP
 
 (
   cd "${repo_root}"
-  "${linuxdeploy}" \
-    --appdir AppDir \
-    --executable AppDir/usr/bin/rembg-gui \
-    --desktop-file src_cpp/packaging/rembg-gui.desktop \
-    --icon-file src_cpp/packaging/rembg-gui.svg \
-    --plugin qt \
-    --output appimage
+
+  linuxdeploy_args=(
+    --appdir AppDir
+    --executable AppDir/usr/bin/rembg-gui
+    --desktop-file src_cpp/packaging/rembg-gui.desktop
+    --icon-file src_cpp/packaging/rembg-gui.svg
+  )
+
+  if ldd AppDir/usr/bin/rembg-gui | grep -Eq 'libQt6(Core|Gui|Widgets|Network)\.so'; then
+    curl -L -o "${linuxdeploy_qt}" \
+      https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+    chmod +x "${linuxdeploy_qt}"
+    linuxdeploy_args+=(--plugin qt)
+  else
+    echo "-- Qt is statically linked; skipping linuxdeploy-plugin-qt"
+  fi
+
+  "${linuxdeploy}" "${linuxdeploy_args[@]}" --output appimage
 
   generated_appimage="$(find . -maxdepth 1 -name '*.AppImage' ! -name 'linuxdeploy*.AppImage' -print -quit)"
   test -n "${generated_appimage}"

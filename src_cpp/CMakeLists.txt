@@ -133,10 +133,35 @@ else()
   target_compile_options(rembg_native_lib PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-function(rembg_import_qt_tls_plugins target)
+function(rembg_import_qt_static_plugins target)
   if(NOT COMMAND qt_import_plugins)
     return()
   endif()
+
+  set(platform_plugins)
+  foreach(plugin IN ITEMS
+      Qt6::QXcbIntegrationPlugin
+      Qt6::QMinimalIntegrationPlugin
+      Qt6::QOffscreenIntegrationPlugin
+      Qt6::QLinuxFbIntegrationPlugin
+      Qt6::QEglFSIntegrationPlugin
+      Qt6::QVncIntegrationPlugin
+  )
+    if(TARGET ${plugin})
+      list(APPEND platform_plugins ${plugin})
+    endif()
+  endforeach()
+
+  set(image_plugins)
+  foreach(plugin IN ITEMS
+      Qt6::QGifPlugin
+      Qt6::QICOPlugin
+      Qt6::QJpegPlugin
+  )
+    if(TARGET ${plugin})
+      list(APPEND image_plugins ${plugin})
+    endif()
+  endforeach()
 
   set(tls_plugins)
   foreach(plugin IN ITEMS
@@ -150,14 +175,25 @@ function(rembg_import_qt_tls_plugins target)
     endif()
   endforeach()
 
+  set(plugin_imports)
+  if(platform_plugins)
+    list(APPEND plugin_imports platforms ${platform_plugins})
+  endif()
+  if(image_plugins)
+    list(APPEND plugin_imports imageformats ${image_plugins})
+  endif()
   if(tls_plugins)
-    qt_import_plugins(${target} INCLUDE_BY_TYPE tls ${tls_plugins})
+    list(APPEND plugin_imports tls ${tls_plugins})
+  endif()
+
+  if(plugin_imports)
+    qt_import_plugins(${target} INCLUDE_BY_TYPE ${plugin_imports})
   endif()
 endfunction()
 
 add_executable(rembg-gui-native src/main.cpp)
 target_link_libraries(rembg-gui-native PRIVATE rembg_native_lib)
-rembg_import_qt_tls_plugins(rembg-gui-native)
+rembg_import_qt_static_plugins(rembg-gui-native)
 set_target_properties(rembg-gui-native PROPERTIES OUTPUT_NAME rembg-gui)
 
 add_custom_command(TARGET rembg-gui-native POST_BUILD
@@ -297,7 +333,7 @@ if(BUILD_TESTING)
   set(REMBG_TEST_ENVIRONMENT
     "QT_PLUGIN_PATH=${REMBG_QT_PLUGIN_DIR}"
   )
-  rembg_import_qt_tls_plugins(rembg-native-tests)
+  rembg_import_qt_static_plugins(rembg-native-tests)
   set_tests_properties(rembg-native-tests
     PROPERTIES
       TIMEOUT 600
@@ -312,7 +348,7 @@ if(BUILD_TESTING)
     )
     target_compile_features(rembg-gui-smoke-tests PRIVATE cxx_std_23)
     target_link_libraries(rembg-gui-smoke-tests PRIVATE rembg_native_lib Qt6::Test)
-    rembg_import_qt_tls_plugins(rembg-gui-smoke-tests)
+    rembg_import_qt_static_plugins(rembg-gui-smoke-tests)
     add_custom_command(TARGET rembg-gui-smoke-tests POST_BUILD
       COMMAND "${CMAKE_COMMAND}" -E copy_if_different
               ${REMBG_ONNXRUNTIME_RUNTIME_FILES}
