@@ -48,8 +48,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            autoconf \
+            autoconf-archive \
+            automake \
+            build-essential \
             libfuse2 \
             libgl1-mesa-dev \
+            libtool \
             libx11-dev \
             libxcb1-dev \
             libxcb-cursor-dev \
