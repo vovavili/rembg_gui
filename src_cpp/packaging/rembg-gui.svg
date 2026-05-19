@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Rembg GUI">
+  <rect width="128" height="128" rx="24" fill="#202124"/>
+  <path d="M28 28h72v72H28z" fill="#f7f7f2"/>
+  <path d="M28 28h18v18H28zm36 0h18v18H64zm18 18h18v18H82zM46 46h18v18H46zm18 18h18v18H64zM28 82h18v18H28zm36 0h18v18H64zm18 18h18v-18H82z" fill="#d8dde3"/>
+  <circle cx="72" cy="56" r="20" fill="#2f7dd1"/>
+  <path d="M34 96c10-24 24-36 42-36 15 0 25 10 32 36z" fill="#38a169"/>
+</svg>

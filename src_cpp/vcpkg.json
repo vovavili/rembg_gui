@@ -1,0 +1,19 @@
+{
+  "name": "rembg-gui",
+  "version-string": "1.0.0",
+  "dependencies": [
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "gui",
+        "jpeg",
+        "network",
+        "png",
+        "testlib",
+        "thread",
+        "widgets"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Rembg GUI
+Comment=Remove image backgrounds
+Exec=rembg-gui
+Icon=rembg-gui
+Categories=Graphics;Photography;
+Terminal=false
+StartupWMClass=rembg-gui

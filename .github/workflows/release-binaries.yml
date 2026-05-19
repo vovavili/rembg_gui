@@ -1,0 +1,142 @@
+name: release binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            os: windows-latest
+            triplet: x64-windows
+            artifact: rembg-gui-windows-x64.zip
+          - name: linux-x64
+            os: ubuntu-22.04
+            triplet: x64-linux
+            artifact: rembg-gui-linux-x64.AppImage
+
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_INSTALLED_DIR: ${{ github.workspace }}/vcpkg_installed
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build packages
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libfuse2 \
+            libgl1-mesa-dev \
+            libx11-dev \
+            libxcb1-dev \
+            libxcb-cursor-dev \
+            libxcb-icccm4-dev \
+            libxcb-image0-dev \
+            libxcb-keysyms1-dev \
+            libxcb-randr0-dev \
+            libxcb-render-util0-dev \
+            libxcb-shape0-dev \
+            libxcb-shm0-dev \
+            libxcb-sync-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xkb-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            patchelf \
+            pkg-config
+
+      - name: Restore vcpkg cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg
+            ${{ github.workspace }}/vcpkg_installed
+          key: vcpkg-${{ matrix.triplet }}-${{ hashFiles('src_cpp/vcpkg.json') }}
+
+      - name: Bootstrap vcpkg on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (!(Test-Path vcpkg)) {
+            git clone https://github.com/microsoft/vcpkg.git
+          }
+          ./vcpkg/bootstrap-vcpkg.bat
+
+      - name: Bootstrap vcpkg on Linux
+        if: runner.os == 'Linux'
+        run: |
+          if [ ! -d vcpkg ]; then
+            git clone https://github.com/microsoft/vcpkg.git
+          fi
+          ./vcpkg/bootstrap-vcpkg.sh
+
+      - name: Configure
+        run: >
+          cmake -S src_cpp -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+          -DVCPKG_INSTALLED_DIR=${{ github.workspace }}/vcpkg_installed
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Test
+        env:
+          QT_QPA_PLATFORM: minimal
+          REMBG_NATIVE_RUN_MODEL_TESTS: "1"
+          U2NET_HOME: ${{ github.workspace }}/build/model-cache
+        run: ctest --test-dir build --output-on-failure -C Release
+
+      - name: Install Windows bundle
+        if: runner.os == 'Windows'
+        run: cmake --install build --config Release --prefix ${{ github.workspace }}/dist/rembg-gui
+
+      - name: Package Windows bundle
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/rembg-gui/* -DestinationPath ${{ matrix.artifact }}
+
+      - name: Install Linux AppDir
+        if: runner.os == 'Linux'
+        run: cmake --install build --config Release --prefix "$PWD/AppDir/usr"
+
+      - name: Build Linux AppImage
+        if: runner.os == 'Linux'
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          QMAKE: ${{ github.workspace }}/vcpkg_installed/${{ matrix.triplet }}/tools/Qt6/bin/qmake
+        run: |
+          curl -L -o linuxdeploy-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -L -o linuxdeploy-plugin-qt-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/rembg-gui \
+            --desktop-file src_cpp/packaging/rembg-gui.desktop \
+            --icon-file src_cpp/packaging/rembg-gui.svg \
+            --plugin qt \
+            --output appimage
+
+          generated_appimage="$(find . -maxdepth 1 -name '*.AppImage' ! -name 'linuxdeploy*.AppImage' -print -quit)"
+          test -n "$generated_appimage"
+          mv "$generated_appimage" "${{ matrix.artifact }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.artifact }}
