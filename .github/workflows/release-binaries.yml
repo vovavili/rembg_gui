@@ -112,6 +112,8 @@ jobs:
       - name: Test
         env:
           QT_QPA_PLATFORM: minimal
+          QT_PLUGIN_PATH: ${{ github.workspace }}/vcpkg_installed/${{ matrix.triplet }}/Qt6/plugins
+          QT_QPA_PLATFORM_PLUGIN_PATH: ${{ github.workspace }}/vcpkg_installed/${{ matrix.triplet }}/Qt6/plugins/platforms
           REMBG_NATIVE_RUN_MODEL_TESTS: "1"
           U2NET_HOME: ${{ github.workspace }}/build/model-cache
         run: ctest --test-dir build --output-on-failure -C Release

@@ -206,6 +206,32 @@ if(COMMAND qt_generate_deploy_app_script)
   install(SCRIPT ${rembg_gui_deploy_script})
 endif()
 
+function(rembg_resolve_qt_plugin_dir output_variable)
+  if(TARGET Qt6::qmake)
+    get_target_property(qmake_executable Qt6::qmake IMPORTED_LOCATION)
+    if(qmake_executable)
+      execute_process(
+        COMMAND "${qmake_executable}" -query QT_INSTALL_PLUGINS
+        OUTPUT_VARIABLE qmake_plugin_dir
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE qmake_result
+      )
+      if(qmake_result EQUAL 0 AND qmake_plugin_dir)
+        file(TO_CMAKE_PATH "${qmake_plugin_dir}" qmake_plugin_dir)
+        set(${output_variable} "${qmake_plugin_dir}" PARENT_SCOPE)
+        return()
+      endif()
+    endif()
+  endif()
+
+  if(DEFINED VCPKG_INSTALLED_DIR AND DEFINED VCPKG_TARGET_TRIPLET)
+    set(${output_variable} "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/Qt6/plugins" PARENT_SCOPE)
+    return()
+  endif()
+
+  set(${output_variable} "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/Qt6/plugins" PARENT_SCOPE)
+endfunction()
+
 if(BUILD_TESTING)
   file(TO_CMAKE_PATH "${REMBG_REPO_ROOT}/example.png" REMBG_NATIVE_SAMPLE_IMAGE)
   add_executable(rembg-native-tests
@@ -226,15 +252,21 @@ if(BUILD_TESTING)
             $<TARGET_FILE_DIR:rembg-native-tests>
   )
   add_test(NAME rembg-native-tests COMMAND rembg-native-tests)
-  if(DEFINED VCPKG_INSTALLED_DIR AND DEFINED VCPKG_TARGET_TRIPLET)
-    set(REMBG_QT_PLUGIN_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/Qt6/plugins")
-  else()
-    set(REMBG_QT_PLUGIN_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/Qt6/plugins")
-  endif()
+  rembg_resolve_qt_plugin_dir(REMBG_QT_PLUGIN_DIR)
+  set(REMBG_QT_PLATFORM_PLUGIN_DIR "${REMBG_QT_PLUGIN_DIR}/platforms")
+  set(REMBG_TEST_ENVIRONMENT
+    "QT_QPA_PLATFORM=minimal"
+    "QT_PLUGIN_PATH=${REMBG_QT_PLUGIN_DIR}"
+    "QT_QPA_PLATFORM_PLUGIN_PATH=${REMBG_QT_PLATFORM_PLUGIN_DIR}"
+  )
+  set(REMBG_TEST_ENVIRONMENT_MODIFICATION
+    "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
+    "PATH=path_list_prepend:$<TARGET_FILE_DIR:onnxruntime::onnxruntime>"
+  )
   set_tests_properties(rembg-native-tests
     PROPERTIES
       TIMEOUT 600
-      ENVIRONMENT_MODIFICATION
-        "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>;PATH=path_list_prepend:$<TARGET_FILE_DIR:onnxruntime::onnxruntime>;QT_PLUGIN_PATH=path_list_prepend:${REMBG_QT_PLUGIN_DIR}"
+      ENVIRONMENT "${REMBG_TEST_ENVIRONMENT}"
+      ENVIRONMENT_MODIFICATION "${REMBG_TEST_ENVIRONMENT_MODIFICATION}"
   )
 endif()
