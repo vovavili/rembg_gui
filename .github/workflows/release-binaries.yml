@@ -5,6 +5,19 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag to create, for example v0.1.0-native.1"
+        required: true
+        type: string
+      prerelease:
+        description: "Mark the GitHub Release as a prerelease"
+        default: true
+        required: true
+        type: boolean
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -140,3 +153,46 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.artifact }}
+
+  publish:
+    name: publish GitHub release
+    needs: build
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
+          IS_PRERELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
+        run: |
+          set -euo pipefail
+
+          assets=(
+            "release-assets/windows-x64/rembg-gui-windows-x64.zip"
+            "release-assets/linux-x64/rembg-gui-linux-x64.AppImage"
+          )
+
+          for asset in "${assets[@]}"; do
+            test -f "$asset"
+          done
+
+          release_flags=()
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            release_flags+=(--prerelease)
+          fi
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release upload "$TAG_NAME" "${assets[@]}" --clobber
+          else
+            gh release create "$TAG_NAME" "${assets[@]}" \
+              --target "$GITHUB_SHA" \
+              --title "$TAG_NAME" \
+              --generate-notes \
+              "${release_flags[@]}"
+          fi
